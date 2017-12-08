@@ -1,0 +1,10 @@
+4,b,1,performance,little
+4,b,2,performance,capacity
+4,b,3,process,static
+4,b,4,analysis,static
+4,b,5,testing,method
+4,b,6,testing,coverage
+4,b,7,visual,diagram
+4,b,8,visual,stat
+4,b,9,visual,stat
+4,b,10,modelling,basics

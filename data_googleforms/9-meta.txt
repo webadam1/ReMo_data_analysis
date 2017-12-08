@@ -1,0 +1,10 @@
+1,modelling,abstraction,0,1,0,1
+2,modelling,basics,1,0,0,0
+3,structural,graph,1,0,0,1
+4,modelling,abstraction,0,1,0,1
+5,state,properties,0,0,0,1
+6,process,basics,1,0,0,0
+7,process,basics,0,1,1,0
+8,process,basics,1,0,0,1
+9,process,basics,0,0,0,1
+10,performance,capacity,1,1,0,0

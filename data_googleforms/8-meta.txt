@@ -1,0 +1,10 @@
+1,performance,capacity,0,1,1,0
+2,performance,xput,0,1,1,0
+3,performance,xput,0,1,0,0
+4,process,performance,0,0,1,0
+5,analysis,static,1,1,1,0
+6,testing,method,0,0,0,0
+7,visual,diagrams,1,0,1,0
+8,visual,stat,1,1,1,0
+9,visual,stat,1,0,0,1
+10,synthesis,codegen,1,1,1,0

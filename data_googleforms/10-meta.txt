@@ -1,0 +1,10 @@
+1,analysis,modelchecking,1,0,0,1
+2,process,basics,1,1,1,1
+3,testing,coverage,1,0,0,1
+4,testing,method,0,0,0,0
+5,visual,stat,1,0,1,0
+6,visual,diagrams,0,1,1,0
+7,performance,little,1,0,1,0
+8,performance,xput,1,0,0,0
+9,process,performance,0,1,0,0
+10,synthesis,codegen,0,1,0,0

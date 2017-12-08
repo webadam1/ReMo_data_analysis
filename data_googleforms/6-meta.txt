@@ -1,0 +1,9 @@
+2,performance,xput,1,1,1,1
+3,performance,capacity,1,0,1,1
+4,performance,simulation,0,1,1,1
+5,performance,simulation,1,1,0,0
+6,analysis,static,1,0,0,1
+7,synthesis,specitification,1,0,0,1
+8,testing,method,0,1,1,1
+9,testing,method,1,0,0,0
+10,testing,coverage,1,0,1,0

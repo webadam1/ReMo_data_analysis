@@ -1,0 +1,10 @@
+1,visual,stat,1,0,1,0
+2,performance,capacity,1,1,0,0
+3,performance,little,1,0,1,0
+4,process,wellformedness,1,0,0,0
+5,process,static,1,0,0,0
+6,process,static,1,0,1,0
+7,testing,method,0,1,0,0
+8,testing,method,0,0,0,0
+9,testing,coverage,1,0,0,0
+10,analysis,modelchecking,1,0,1,1

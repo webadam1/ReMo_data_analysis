@@ -1,0 +1,9 @@
+1,modelling,abstraction,1,0,1,0
+2,modelling,abstraction,0,0,1,0
+3,structural,graph,0,1,1,0
+4,state,properties,0,0,1,0
+5,modelling,abstraction,0,1,0,0
+6,state,statespace,0,0,1,1
+7,state,statespace,0,1,0,0
+8,process,static,0,1,0,0
+9,process,static,0,1,1,0

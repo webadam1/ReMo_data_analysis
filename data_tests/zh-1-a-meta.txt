@@ -1,0 +1,10 @@
+1,a,1,modelling,basics
+1,a,2,structural,relations
+1,a,3,structural,modelling
+1,a,4,state,statespace
+1,a,5,state,properties
+1,a,6,state,composition
+1,a,7,modelling,basics
+1,a,8,process,basics
+1,a,9,process,wellformedness
+1,a,10,process,basics

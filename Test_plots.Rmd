@@ -1,0 +1,276 @@
+---
+title: "Test_plots"
+author: "Wéber Ádám"
+date: '2017 november 29 '
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(plyr)
+#rewrite to your working directory
+setwd("D:\\Adam\\Szakdolgozat\\_Gitre\\ReMo_data_analysis\\data_tests")
+
+theme_set(theme_minimal(base_size = 11)) 
+myGradient_1 = c("#ff6868","#05406b")
+myGradient_2 = c("#35bfc6","#c6355e")
+```
+
+
+```{r read, include=FALSE, message=FALSE}
+zh_1 <- as.data.frame(unclass(read_csv2("zh-1.csv")))
+zh_2 <- as.data.frame(unclass(read_csv2("zh-2.csv")))
+zh_3 <- as.data.frame(unclass(read_csv2("zh-3.csv")))
+zh_4 <- as.data.frame(unclass(read_csv2("zh-4.csv")))
+
+zh_all <- as.data.frame(unclass(read_csv2("zh-all.csv")))
+
+zh_1_answers <- as.data.frame(unclass(read_csv2("zh-1-answers.csv")))
+zh_2_answers <- as.data.frame(unclass(read_csv2("zh-2-answers.csv")))
+zh_3_answers <- as.data.frame(unclass(read_csv2("zh-3-answers.csv")))
+zh_4_answers <- as.data.frame(unclass(read_csv2("zh-4-answers.csv")))
+
+zh_all_answers <- as.data.frame(unclass(read_csv2("zh-all-answers.csv")))
+zh_all_answers$test_id <- as.factor(zh_all_answers$test_id)
+zh_all_answers$type <- as.factor(zh_all_answers$type)
+zh_all_answers$subtype <- as.factor(zh_all_answers$subtype)
+
+#assigning meaningful names to test id numbers
+zh_all_answers$test_name = mapvalues(zh_all_answers$test_id, from = c("1","2","3","4"),to = c("1. ZH","2. ZH","1. PZH","2. PZH"))
+
+#reordering factor levels for visualization
+zh_all_answers$test_name = factor(zh_all_answers$test_name, levels = c("1. ZH","1. PZH","2. ZH","2. PZH"))
+
+#assigning meaningful names to test id numbers
+zh_all$test_name = mapvalues(zh_all$test_id, from = c("1","2","3","4"),to = c("1. ZH","2. ZH","1. PZH","2. PZH"))
+
+#reordering factor levels for visualization
+zh_all$test_name = factor(zh_all$test_name, levels = c("1. ZH","1. PZH","2. ZH","2. PZH"))
+```
+
+
+
+```{r, include=FALSE}
+#basis of function written by Natália Novák
+makeGradient <- function(vec, palette_of_two, highlight = FALSE) {
+  
+  # ha nem értelmezhető adatokat kapunk, nem módosít semmit
+  if (class(vec)=="factor" || class(vec)=="character") {
+    return();
+  }
+  
+  # ismétlődő elemek kiszűrése
+  vec <- unique(vec)
+  vec <- sort(vec, decreasing = FALSE)
+  
+  c1 <- col2rgb(palette_of_two[1], alpha = FALSE)
+  c2 <- col2rgb(palette_of_two[2], alpha = FALSE)
+  
+  # skálázás
+  r <- integer(0)
+  g <- integer(0)
+  b <- integer(0)
+  j = 0
+  for (i in vec) {
+    i = (i-min(vec))/(max(vec)-min(vec))
+    j = j+1
+    r[j] <- round(c1[1] + i*(c2[1]-c1[1]), 0)
+    g[j] <- round(c1[2] + i*(c2[2]-c1[2]), 0)
+    b[j] <- round(c1[3] + i*(c2[3]-c1[3]), 0)
+  }
+  
+  if (length(vec) > 2 && highlight) {
+    midIndex = ceiling(length(vec)/2)
+    r[midIndex] = round((r[midIndex] + 255) / 2)
+    g[midIndex] = round((g[midIndex] + 255) / 2)
+    b[midIndex] = round((b[midIndex] + 255) / 2)
+  }
+  
+  # legyen minden hexa
+  r <- format(as.hexmode(r), width=2)
+  g <- format(as.hexmode(g), width=2)
+  b <- format(as.hexmode(b), width=2)
+  
+  hex <- data.frame(r, g, b)
+  
+  # legyen n darab hex stringünk
+  cols <- character(0)
+  j <- 0
+  while (j <= length(vec)) {
+    j <- j + 1;
+    cols <- c(cols, paste('#', hex[j,1], hex[j,2], hex[j,3], sep = ""))
+  }
+  
+  return(cols)
+}
+```
+\newpage
+## Plots
+
+#### Pontszámok megoszlása a különböző kérdőíveken belül:
+
+```{r}
+zh_all_answers %>%
+    ggplot(aes(score, fill=test_name)) +
+    geom_histogram(binwidth = 0.25) +
+    facet_wrap(~test_name, ncol = 2, scales = "free") +
+    guides(fill=FALSE) +
+    scale_fill_manual(values = makeGradient(
+      as.numeric(1:length(levels(zh_all_answers$test_name))), myGradient_1))
+```
+
+\newpage
+
+#### Különböző témák kérdéseire kapott pontszámok:
+
+```{r}
+zh_all_answers %>%
+    ggplot(aes(x =type,
+               fill = forcats::fct_rev(as.factor(round(score,1))))) +
+    geom_bar(width = 0.7) +
+    
+    labs(fill = "score") +
+    facet_wrap(~test_name, scales = "free") +
+ # coord_flip() +
+    scale_fill_manual(values = makeGradient(zh_all_answers$score, myGradient_1, TRUE))
+```
+
+\newpage
+
+#### Kérdéstípusonkénti pontszám eloszlás:
+
+```{r}
+zh_all_answers %>%
+    ggplot(aes(x =type, y = score)) +
+    geom_boxplot(aes(fill = type)) +
+    # geom_boxplot(aes(fill = as.factor(as.numeric(as.character(test_id)) %% 2)))
+    facet_wrap(~test_name, scales = "free") +
+    guides(fill = FALSE) + 
+    stat_summary(fun.y=mean, colour="white", geom="point", 
+               shape=4, size=3,show.legend = FALSE) +
+    theme(axis.text.x = element_text(angle=45)) +
+    scale_fill_manual(values = makeGradient(
+      1:length(levels(as.factor(zh_all_answers$type))), myGradient_1))
+```
+
+\newpage
+
+#### Pontszámok formonként kérdésenként:
+
+```{r, fig.width=10,fig.height=8}
+
+zh_all_answers %>%
+    ggplot() +
+    geom_bar(aes(question_id,
+                 fill = forcats::fct_rev(as.factor(round(score,1))),
+                 alpha =! empty)) +
+    labs(fill = "Score", alpha = "Answered") + 
+    facet_wrap(~test_name, ncol = 2, scales = "free") +
+    scale_fill_manual(values = makeGradient(zh_all_answers$score,
+                                            myGradient_1))
+```
+\newpage
+
+#### Pontszám megoszlása altémánkként:
+
+```{r, fig.width=10,fig.height=7}
+zh_all_answers %>%
+    ggplot() +
+    geom_boxplot(aes(subtype, score, fill=(subtype)),outlier.size=0.5) +
+    labs(fill = "score") +
+    geom_hline(yintercept = 0, color = "grey", size = 0.5) + 
+    geom_hline(yintercept = -1, color = "grey", size = 0.5) + 
+    geom_hline(yintercept = 1, color = "grey", size = 0.5) + 
+    coord_flip() +
+    guides(fill = FALSE) + 
+    facet_grid(~type ~test_name, scales = "free") +
+    scale_fill_manual(values = makeGradient(1:length(levels(zh_all_answers$subtype)),
+                                            myGradient_1)) +
+    theme(axis.ticks.x = element_blank(),
+          axis.text.x=element_blank(), 
+          axis.title.x = element_blank())
+
+```
+
+Profile plotot csinálni ezekről ^^^
+
+```{r}
+zh_all %>%
+    ggplot(aes(Prereq_score, fill=Prereq_passed)) +
+    geom_histogram(binwidth = 0.25) +
+    facet_wrap(~test_name, ncol = 2, scales = "free_y") +
+    scale_fill_manual(values = makeGradient(
+      as.numeric(1:length(levels(zh_all$Prereq_passed))), myGradient_1))
+```
+```{r}
+zh_all %>%
+    ggplot(aes(Sum, fill=(Sum >= 14))) +
+    geom_histogram(binwidth = 2) +
+    labs(fill = "Passed") + 
+    facet_wrap(~test_name, ncol = 2) +
+    scale_fill_manual(values = makeGradient(
+      as.numeric(1:length(levels(zh_all$Prereq_passed))), rev(myGradient_1)))
+```
+
+
+```{r}
+zh_all %>%
+    ggplot(aes(x = Prereq_score)) +
+    facet_wrap(~test_name, ncol = 2) +
+    labs(color = "group") + 
+    geom_vline(xintercept = mean(filter(zh_all, zh_all$Group == 1)$Prereq_score), color = myGradient_1[1]) +
+    geom_vline(xintercept = mean(filter(zh_all, zh_all$Group == 2)$Prereq_score), color = myGradient_1[2]) +
+    geom_line(aes(y = ..count..,color = as.character(Group)),
+              stat="bin", binwidth=0.5, size = 1)
+```
+TODO: Átementek száma között van-e különbség
+
+```{r}
+zh_all %>%
+    ggplot(aes(Prereq_score, Sum)) +
+    geom_point(alpha=0.2, aes(color=(Sum >= 14))) +
+    labs(color = "Passed") + 
+    facet_wrap(~test_name, ncol = 2) +
+    scale_color_manual(values = rev(myGradient_1))
+```
+```{r}
+zh_all %>%
+    filter(Prereq_passed == "GO") %>%
+    ggplot(aes(Prereq_score, Sum)) +
+    geom_point(alpha=0.3, size = 2, aes(color=(Sum >= 14))) +
+    labs(color = "Passed") + 
+    facet_wrap(~test_name, ncol = 2) +
+    geom_smooth(color=myGradient_1[1], aes(Prereq_score, Sum)) +
+    scale_color_manual(values = rev(myGradient_1))
+```
+
+```{r}
+zh_all %>%
+    filter(Prereq_passed == "GO") %>%
+    ggplot(aes(as.character(Prereq_score), Sum, fill=as.character(Prereq_score))) +
+    geom_boxplot() +
+    labs(x = "Prereq_score") + 
+    theme(axis.text.x = element_blank()) +
+    guides(fill = FALSE) + 
+    facet_wrap(~test_name, ncol = 2) +
+    scale_fill_manual(values = makeGradient(
+      filter(zh_all, zh_all$Sum >= 14)$Prereq_score, rev(myGradient_1)))
+```
+Mediánt rárakni az átmentek pontszámaira
+
+```{r}
+zh_all_answers %>%
+    ggplot(aes(x = question_id, y = score)) +
+    facet_wrap(~test_id, ncol = 2) +
+    labs(color = "group") + 
+    geom_smooth(aes(color = as.character(group_id)),
+              size = 1)
+```
+
+```{r}
+#rewrite to your working directory
+setwd("D:\\Adam\\Szakdolgozat\\_Gitre\\ReMo_data_analysis")
+```

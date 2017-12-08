@@ -1,0 +1,10 @@
+3,b,1,state,properties
+3,b,2,state,properties
+3,b,3,state,composition
+3,b,4,state,properties
+3,b,5,process,basics
+3,b,6,process,basics
+3,b,7,structural,relations
+3,b,8,structural,modelling
+3,b,9,structural,graph
+3,b,10,modelling,abstraction

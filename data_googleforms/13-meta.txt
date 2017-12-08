@@ -1,0 +1,10 @@
+1,modelling,basics,0,1,1,0
+2,structural,modelling,0,1,1,0
+3,structural,modelling,1,0,0,1
+4,state,statespace,1,1,0,1
+5,state,properties,0,0,0,0
+6,state,composition,1,1,0,0
+7,modelling,basics,0,1,0,0
+8,process,basics,1,1,1,0
+9,process,wellformedness,1,0,0,1
+10,process,basics,0,1,1,0

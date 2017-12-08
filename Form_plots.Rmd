@@ -1,0 +1,290 @@
+---
+title: "Form_plots"
+author: "Wéber Ádám"
+date: '2017 november 29 '
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+#rewrite to your working directory
+setwd("D:\\Adam\\Szakdolgozat\\_Gitre\\ReMo_data_analysis\\data_googleforms")
+```
+
+
+```{r read, include=FALSE}
+answers_all <- read_csv2("all_answers.csv")
+#faktorrá varázsol
+answers_all$type <- factor(answers_all$type)
+answers_all$subtype <- factor(answers_all$subtype)
+answers_all$form_id <- factor(answers_all$form_id)
+answers_all$question_id <- factor(answers_all$question_id)
+
+answers_all <- answers_all %>%
+    mutate(
+      empty = (a==0 & b==0 & c==0 & d==0 & score==0)) 
+```
+
+
+
+```{r, include=FALSE}
+#basis of function written by Natália Novák
+makeGradient <- function(vec, palette_of_two, highlight = FALSE) {
+  
+  # ha nem értelmezhető adatokat kapunk, nem módosít semmit
+  if (class(vec)=="factor" || class(vec)=="character") {
+    return();
+  }
+  
+  # ismétlődő elemek kiszűrése
+  vec <- unique(vec)
+  vec <- sort(vec, decreasing = FALSE)
+  
+  c1 <- col2rgb(palette_of_two[1], alpha = FALSE)
+  c2 <- col2rgb(palette_of_two[2], alpha = FALSE)
+  
+  # skálázás
+  r <- integer(0)
+  g <- integer(0)
+  b <- integer(0)
+  j = 0
+  for (i in vec) {
+    i = (i-min(vec))/(max(vec)-min(vec))
+    j = j+1
+    r[j] <- round(c1[1] + i*(c2[1]-c1[1]), 0)
+    g[j] <- round(c1[2] + i*(c2[2]-c1[2]), 0)
+    b[j] <- round(c1[3] + i*(c2[3]-c1[3]), 0)
+  }
+  
+  if (length(vec) > 2 && highlight) {
+    midIndex = ceiling(length(vec)/2)
+    r[midIndex] = round((r[midIndex] + 255) / 2)
+    g[midIndex] = round((g[midIndex] + 255) / 2)
+    b[midIndex] = round((b[midIndex] + 255) / 2)
+  }
+  
+  # legyen minden hexa
+  r <- format(as.hexmode(r), width=2)
+  g <- format(as.hexmode(g), width=2)
+  b <- format(as.hexmode(b), width=2)
+  
+  hex <- data.frame(r, g, b)
+  
+  # legyen n darab hex stringünk
+  cols <- character(0)
+  j <- 0
+  while (j <= length(vec)) {
+    j <- j + 1;
+    cols <- c(cols, paste('#', hex[j,1], hex[j,2], hex[j,3], sep = ""))
+  }
+  
+  return(cols)
+}
+```
+
+```{r style, include=FALSE}
+theme_set(theme_minimal(base_size = 11)) 
+myGradient_1 = c("#ff6868","#05406b")
+myGradient_2 = c("#35bfc6","#c6355e")
+```
+
+\newpage
+## Plots
+
+#### Pontszámok megoszlása a különböző kérdőíveken belül:
+
+```{r}
+answers_all %>%
+    filter(empty == F) %>%
+    ggplot(aes(score, fill=as.factor(form_id))) +
+    geom_histogram(binwidth = 0.25) +
+    facet_wrap(~form_id,ncol = 5) + guides(fill=FALSE) +
+    scale_fill_manual(values = 
+                        makeGradient(as.numeric(answers_all$form_id), 
+                                     myGradient_2))
+```
+
+```{r}
+forms_all %>%
+    ggplot(aes(score, fill=as.factor(form_id))) +
+    geom_histogram(binwidth = 0.5) +
+    facet_wrap(~form_id,ncol = 5) + guides(fill=FALSE) +
+    scale_fill_manual(values = 
+                        makeGradient(as.numeric(answers_all$form_id), 
+                                     myGradient_2))
+```
+
+\newpage
+
+### Kérdéstípusok
+
+#### Kérdéstípusok megoszlása kérdőíveken belül:
+
+```{r}
+ggplot(answers_all, aes(x =form_id, fill = forcats::fct_rev(as.factor(
+                          round(score*4,0)/4)))) +
+    labs(fill = "score") +
+    geom_bar(width = 0.9) +
+  scale_fill_manual(values = makeGradient(round(answers_all$score*4,0)/4,
+                                            myGradient_2)) +
+    theme_minimal()
+```
+\newpage
+
+#### Különböző témák kérdéseire kapott pontszámok:
+
+```{r}
+ggplot(answers_all, aes(x =type,
+                        fill = forcats::fct_rev(as.factor(
+                          round(score*4,0)/4)))) +
+    geom_bar(width = 0.7) +
+    coord_flip() +
+    labs(fill = "score") +
+    scale_fill_manual(values = 
+                        makeGradient(round(answers_all$score*4,0)/4, 
+                                     myGradient_2, 
+                                     TRUE))
+```
+
+```{r fig.width=8}
+ggplot(answers_all, aes(x = type,
+                        fill = forcats::fct_rev(as.factor(
+                          round(score*4,0)/4)))) +
+    geom_bar(width = 0.4) +
+    facet_wrap(~type,ncol = 9, scales = "free") +
+    labs(fill = "score") +
+    scale_fill_manual(values = makeGradient(round(answers_all$score*4,0)/4, 
+                                            myGradient_2, 
+                                            TRUE)) +
+    scale_x_discrete(position = "top") +
+    #theme_void() +
+    theme(axis.text.y = element_blank(),
+          axis.ticks = element_blank(),
+          panel.grid = element_blank(),
+          axis.title = element_blank(),
+          strip.text = element_blank(),
+          strip.background = element_blank(),
+          panel.spacing = unit(-3, "lines"))
+```
+
+\newpage
+
+#### Kérdéstípusonkénti pontszám eloszlás:
+
+```{r}
+ggplot(answers_all) +
+  geom_boxplot(aes(x = type, y = score, fill=type), outlier.size = 1) +
+  theme(axis.text.x = element_text(angle=45)) +
+  scale_fill_manual(values = makeGradient(1:length(levels(answers_all$type)),
+                                            myGradient_2))
+```
+\newpage
+
+#### Pontszámok formonként kérdésenként:
+
+```{r, fig.width=10,fig.height=8}
+
+answers_all %>%
+    ggplot() +
+    geom_bar(aes(as.character(question_id),
+                 fill = forcats::fct_rev(as.factor(round(score*4,0)/4)))) +
+    labs(fill = "score") + 
+    facet_wrap(~form_id, ncol = 4, scales = "free") +
+    scale_fill_manual(values = makeGradient(round(answers_all$score*4,0)/4,
+                                            myGradient_2))
+```
+\newpage
+
+#### Pontszám megoszlása altémánkként:
+
+```{r, fig.width=10,fig.height=7}
+
+answers_all %>%
+    ggplot() +
+    geom_bar(aes(subtype,
+                 fill = forcats::fct_rev(as.factor(round(score*4,0)/4)))) +
+    labs(fill = "score") + 
+    coord_flip() +
+    facet_wrap(~type, ncol = 4, scales = "free") +
+    
+    scale_fill_manual(values = makeGradient(round(answers_all$score*4,0)/4,
+                                            myGradient_2)) +
+    theme(axis.ticks.x = element_blank(),
+          axis.text.x=element_blank(), 
+          axis.title.x = element_blank())
+```
+
+```{r, fig.width=10,fig.height=7}
+
+answers_all %>%
+    ggplot() +
+    geom_boxplot(aes(subtype, score, fill = subtype)) +
+    labs(fill = "score") + 
+    coord_flip() +
+    facet_wrap(~type, ncol = 3, scales = "free") +
+    guides(fill = FALSE) + 
+    scale_fill_manual(values = makeGradient(1:length(levels(answers_all$subtype)),
+                                            myGradient_2)) +
+    theme(
+      axis.ticks.x = element_blank(),
+          axis.text.x=element_blank(), 
+          axis.title.x = element_blank())
+```
+\newpage
+
+#### Megválaszolt és kihagyott kérdések aránya:
+ TODO: fordított színezés
+```{r, fig.width=10, fig.height=7}
+answers_all %>%
+    ggplot() +
+    geom_bar(aes(question_id, fill = empty)) + 
+    facet_wrap(~form_id, scales = "free") +
+    scale_fill_manual(values = myGradient_2)
+```
+\newpage
+
+### Kitöltések időbeli eloszlása
+
+#### Időbeli eloszlás kérdőívenként:
+
+```{r, fig.width=10, fig.height=10}
+answers_all %>%
+    filter(date < as.POSIXct("05.19.2017 00:00:01",
+                             format = "%m.%d.%Y %H:%M:%S")) %>% 
+    filter(empty == F) %>%
+    ggplot() +
+    geom_jitter(aes(date, score, color = type), 
+                size = 2, 
+                width = 0.3, 
+                height = 0.1, 
+                alpha = 0.1) +
+    facet_wrap(~form_id, ncol = 3) +
+    geom_smooth(color=myGradient_1[2], aes(date, score)) +
+    theme(axis.text.x = element_text(angle=45))
+
+```
+
+\newpage
+
+```{r, fig.width=8}
+answers_all %>%
+    filter(date < as.POSIXct("05.19.2017 00:00:01",
+                             format = "%m.%d.%Y %H:%M:%S")) %>% 
+    filter(empty == F) %>%
+    ggplot() +
+    geom_histogram(
+      aes(date, fill=forcats::fct_rev(as.factor(round(score,1)))),
+      binwidth = 1500 ) +
+    labs(fill = "score") + 
+    scale_fill_manual(values = makeGradient(answers_all$score,
+                                            myGradient_2))
+
+```
+
+```{r}
+#rewrite to your working directory
+setwd("D:\\Adam\\Szakdolgozat\\_Gitre\\ReMo_data_analysis")
+```
